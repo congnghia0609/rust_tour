@@ -1,8 +1,8 @@
 # rust_tour
-rust_tour is a cheat sheet, quick reference to learn rust programming  
+**rust_tour** is a cheat sheet, quick reference to learn rust programming  
 
 ## Install Rust
-```bash
+```shell script
 # https://www.rust-lang.org/tools/install
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -14,7 +14,7 @@ cargo --version
 ```
 
 ## Init project
-```bash
+```shell script
 # New project rust_tour
 cargo new rust_tour
 cd rust_tour
@@ -39,16 +39,27 @@ cargo test
 ```
 
 ## Rust IDE Tool
-IntelliJ Idea + plugin rust  
-Android Studio + plugin rust  
-VSCode + plugin rust  
+- IntelliJ Idea + plugin rust  
+- Android Studio + plugin rust  
+- VSCode + plugin rust  
 
-## Getting Started
-Reference code detail in file [main.rs](https://github.com/congnghia0609/rust_tour/blob/main/src/main.rs)  
+## Getting Started  
 
+### Ownership Rules
+- Each value in Rust has a variable that's called its owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
+
+### The Rules of References
+- At any given time, you can have either one mutable reference or any number of immutable references.
+- References must always be valid.
+
+
+### 1. Hello world
 ```rust
 // Hello world
 fn main() {
     println!("Hello, world!");
 }
 ```
+
