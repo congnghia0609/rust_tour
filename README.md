@@ -69,6 +69,7 @@ cargo test
 fn main() {
     println!("Hello, world!"); // Hello, world!
     println!("{} days", 31); // 31 days
+    /* Print correct number of arguments */
     println!("{0}, this is {1}. {1}, this is {0}", "Alice", "Bob");
     // Alice, this is Bob. Bob, this is Alice
 
@@ -79,10 +80,6 @@ fn main() {
     /* Print white spaces */
     println!("|{number:>width$}|", number=1, width=6);
     // |     1|
-
-    /* Print correct number of arguments */
-    println!("My name is {0}, {1} {0}", "Bond", "James");
-    // My name is Bond, James Bond
 
     /* Print Structure */
     #[derive(Debug)]
