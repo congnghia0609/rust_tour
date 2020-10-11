@@ -19,6 +19,9 @@ cargo --version
 cargo new rust_tour
 cd rust_tour
 
+# New module library hello_lib
+cargo new hello_lib --lib
+
 # Build project
 cargo build
 
@@ -56,8 +59,9 @@ cargo test
 
 ### Smart Pointers
 - `Box<T>` for allocating values on the heap
-- `Rc<T>`, a reference counting type that enables multiple ownership
+- `Rc<T>` a reference counting type that enables multiple ownership
 - `Ref<T>` and `RefMut<T>`, accessed through `RefCell<T>`, a type that enforces the borrowing rules at runtime instead of compile time
+- `Arc<T>` (atomically reference counted) is a type like `Rc<T>` that is safe to use in concurrent situations.
 
 
 ### 1. Hello world
