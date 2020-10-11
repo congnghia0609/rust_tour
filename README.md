@@ -66,9 +66,44 @@ cargo test
 
 ### 1. Hello world
 ```rust
-// Hello world
 fn main() {
-    println!("Hello, world!");
+    println!("Hello, world!"); // Hello, world!
+    println!("{} days", 31); // 31 days
+    println!("{0}, this is {1}. {1}, this is {0}", "Alice", "Bob");
+    // Alice, this is Bob. Bob, this is Alice
+
+    /* Print format binary */
+    println!("format binary of {} is {:b}", 3, 3);
+    // format binary of 3 is 11
+
+    /* Print white spaces */
+    println!("|{number:>width$}|", number=1, width=6);
+    // |     1|
+
+    /* Print correct number of arguments */
+    println!("My name is {0}, {1} {0}", "Bond", "James");
+    // My name is Bond, James Bond
+
+    /* Print Structure */
+    #[derive(Debug)]
+    struct Person<'a> {
+        name: &'a str,
+        age: u8
+    }
+    let name = "Peter";
+    let age = 27;
+    let peter = Person { name, age };
+    println!("{:?}", peter);
+    // Person { name: "Peter", age: 27 }
+
+    /* Pretty print */
+    println!("{:#?}", peter);
+    /*
+    Person {
+        name: "Peter",
+        age: 27,
+    }
+    */
 }
 ```
 
