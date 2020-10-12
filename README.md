@@ -164,6 +164,9 @@ An array is a collection of objects of the same type T, stored in contiguous mem
 let xs: [i32; 5] = [1, 2, 3, 4, 5];
 println!("xs: {:?}", xs); // xs: [1, 2, 3, 4, 5]
 println!("xs.len: {:?}", xs.len()); // xs.len: 5
+println!("first element: {}", xs[0]); // first element: 1
+println!("xs[0..4]: {:?}", &xs[0..4]); // xs[0..4]: [1, 2, 3, 4]
+println!("xs[0..=4]: {:?}", &xs[0..=4]); // xs[0..=4]: [1, 2, 3, 4, 5]
 ```
 
 
