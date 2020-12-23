@@ -1,18 +1,21 @@
+// `NanoSecond` is a new name for `u64`.
+type NanoSecond = u64;
+type Inch = u64;
 
-// Globals are declared outside all other scopes.
-static LANGUAGE: &str = "Rust";
-const THRESHOLD: i32 = 10;
-
-fn is_big(n: i32) -> bool {
-    // Access constant in some function
-    n > THRESHOLD
-}
+// Use an attribute to silence warning.
+#[allow(non_camel_case_types)]
+type u64_t = u64;
 
 fn main() {
-    let n = 16;
-    // Access constant in the main thread
-    println!("This is {}", LANGUAGE);
-    println!("The threshold is {}", THRESHOLD);
-    println!("{} is {}", n, if is_big(n) { "big" } else { "small" });
-    //=> 16 is big
+    // `NanoSecond` = `Inch` = `u64_t` = `u64`.
+    let nanoseconds: NanoSecond = 5 as u64_t;
+    let inches: Inch = 2 as u64_t;
+
+    // Note that type aliases *don't* provide any extra type safety, because
+    // aliases are *not* new types
+    println!("{} nanoseconds + {} inches = {} unit?",
+             nanoseconds,
+             inches,
+             nanoseconds + inches);
+    //=> 5 nanoseconds + 2 inches = 7 unit?
 }
