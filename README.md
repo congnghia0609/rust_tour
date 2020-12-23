@@ -335,7 +335,8 @@ impl List {
     fn stringify(&self) -> String {
         match *self {
             Cons(head, ref tail) => {
-                //format! is similar to print!, but returns a heap allocated string instead of printing to the console
+                //format! is similar to print!, but returns a heap 
+                // allocated string instead of printing to the console
                 format!("{}, {}", head, tail.stringify())
             },
             Nil => {
