@@ -27,6 +27,22 @@ fn inspect(event: WebEvent) {
     }
 }
 
+// Type aliases
+enum VeryVerboseEnumOfThingsToDoWithNumbers {
+    Add,
+    Subtract,
+}
+impl VeryVerboseEnumOfThingsToDoWithNumbers {
+    fn run(&self, x: i32, y: i32) -> i32 {
+        match self {
+            Self::Add => x + y,
+            Self::Subtract => x - y,
+        }
+    }
+}
+// Creates a type alias
+type Operations = VeryVerboseEnumOfThingsToDoWithNumbers;
+
 fn main() {
     let pressed = WebEvent::KeyPress('x');
     // to_owned() creates an owned String from a string slice.
@@ -40,4 +56,9 @@ fn main() {
     inspect(click); //=> clicked at x=20, y=80
     inspect(load); //=> page loaded
     inspect(unload); //=> page unloaded
+
+    // We can refer to each variant via its alias, not its long and inconvenient name.
+    let opt = Operations::Add;
+    println!("Operations::Add {}", opt.run(2, 3));
+    //=> Operations::Add 5
 }
