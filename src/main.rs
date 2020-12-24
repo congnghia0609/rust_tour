@@ -1,21 +1,25 @@
-// `NanoSecond` is a new name for `u64`.
-type NanoSecond = u64;
-type Inch = u64;
+use std::convert::From;
 
-// Use an attribute to silence warning.
-#[allow(non_camel_case_types)]
-type u64_t = u64;
+#[derive(Debug)]
+struct Number {
+    value: i32,
+}
+
+impl From<i32> for Number {
+    fn from(item: i32) -> Self {
+        println!("In fn From Number");
+        Number {value: item}
+    }
+}
 
 fn main() {
-    // `NanoSecond` = `Inch` = `u64_t` = `u64`.
-    let nanoseconds: NanoSecond = 5 as u64_t;
-    let inches: Inch = 2 as u64_t;
+    let num = Number::from(30);
+    println!("My number is {:?}", num);
+    //=> My number is Number { value: 30 }
 
-    // Note that type aliases *don't* provide any extra type safety, because
-    // aliases are *not* new types
-    println!("{} nanoseconds + {} inches = {} unit?",
-             nanoseconds,
-             inches,
-             nanoseconds + inches);
-    //=> 5 nanoseconds + 2 inches = 7 unit?
+    let int  = 5;
+    let num2: Number = int.into(); // call Number::from(int);
+    println!("My number is {:?}", num2);
+    //=> My number is Number { value: 5 }
 }
+
