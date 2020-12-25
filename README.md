@@ -766,5 +766,92 @@ fn main() {
 
 #### 4.4. for loops
 ```rust
+fn main() {
+    // a) for and range
+    // n will take the values: 1, 2, ..., 100 in each iteration
+    for n in 1..101 {
+        if n % 15 == 0 {
+            println!("fizzbuzz");
+        } else if n % 3 == 0 {
+            println!("fizz");
+        } else if n % 5 == 0 {
+            println!("buzz");
+        } else {
+            println!("{}", n);
+        }
+    }
+    for n in 1..=100 {
+        if n % 15 == 0 {
+            println!("fizzbuzz");
+        } else if n % 3 == 0 {
+            println!("fizz");
+        } else if n % 5 == 0 {
+            println!("buzz");
+        } else {
+            println!("{}", n);
+        }
+    }
 
+    // b) for and iterators
+    let names = vec!["Bob", "Frank", "Ferris"];
+    for name in names.iter() {
+        match name {
+            &"Ferris" => println!("There is a rustacean among us!"),
+            _ => println!("Hello {}", name),
+        }
+    }
+    // Hello Bob
+    // Hello Frank
+    // There is a rustacean among us!
+
+    for name in names.into_iter() {
+        match name {
+            "Ferris" => println!("There is a rustacean among us!"),
+            _ => println!("Hello {}", name),
+        }
+    }
+    // Hello Bob
+    // Hello Frank
+    // There is a rustacean among us!
+
+    let mut names = vec!["Bob", "Frank", "Ferris"];
+    for name in names.iter_mut() {
+        *name = match name {
+            &mut "Ferris" => "There is a rustacean among us!",
+            _ => "Hello",
+        }
+    }
+    println!("names: {:?}", names);
+    //=> names: ["Hello", "Hello", "There is a rustacean among us!"]
+}
+```
+
+#### 4.5. match
+```rust
+fn main() {
+    let number = 13;
+    println!("Tell me about {}", number);
+    match number {
+        // Match a single value
+        1 => println!("One!"),
+        // Match several values
+        2 | 3 | 5 | 7 | 11 => println!("This is a prime"),
+        // Match an inclusive range
+        13..=19 => println!("A teen"),
+        // Handle the rest of cases
+        _ => println!("Ain't special"),
+    }
+    // Tell me about 13
+    // A teen
+
+    let boolean = true;
+    // Match is an expression too
+    let binary = match boolean {
+        // The arms of a match must cover all the possible values
+        false => 0,
+        true => 1,
+    };
+    println!("{} -> {}", boolean, binary);
+    //=> true -> 1
+}
 ```
