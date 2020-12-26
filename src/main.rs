@@ -1,39 +1,68 @@
 
-// A function age which returns a u32
-fn age() -> u32 {
-    15
-}
-
-// Destructure enum
-fn some_number() -> Option<u32> {
-    Some(42)
+// Our example enum
+enum Foo {
+    Bar,
+    Baz,
+    Qux(u32)
 }
 
 fn main() {
-    println!("Tell me what type of person you are");
-    match age() {
-        0 => println!("I haven't celebrated my first birthday yet"),
-        // Counld match 1..=12 directly but then what age
-        // would the child be? Instead, bind to n for the
-        // sequence of 1..=12. Now the age can be reported.
-        n @ 1..=12 => println!("I'm a child of age {:?}", n),
-        n @ 13..=19 => println!("I'm a teen of age {:?}", n),
-        // Nothing bound. Return the result.
-        n => println!("I'm an old person of age {:?}", n),
+    // All have type Option<i32>
+    let number = Some(7);
+    let letter: Option<i32> = None;
+    let emoticon: Option<i32> = None;
+    // The if let construct reads: if let destructures number into
+    // Some(i), evaluate the block({}).
+    if let Some(i) = number {
+        println!("Matched {:?}", i);
     }
-    //=> Tell me what type of person you are
-    //=> I'm a teen of age 15
+    //=> Matched 7
+    // If you need to specify a failure, use an else:
+    if let Some(i) = letter {
+        println!("Matched {:?}", i);
+    } else {
+        // Destructure failed. Change to the failure case.
+        println!("Didn't match a number. Let's go with a letter!");
+    }
+    //=> Didn't match a number. Let's go with a letter!
 
-    // Destructure enum
-    match some_number() {
-        // Got Some variant, match if its value, bound to n,
-        // is equal to 42.
-        Some(n @ 42) => println!("The Answer: {}!", n),
-        // Match any other number.
-        Some(n) => println!("Not interesting... {}", n),
-        // Match anything else (None variant).
-        _ => (),
+    // Provide an altered failing condition.
+    let i_like_letters = false;
+    if let Some(i) = emoticon {
+        println!("Matched {:?}!", i);
+        // Destructure failed. Evaluate an else if condition to see if the
+        // alternate failure branch should be taken:
+    } else if i_like_letters {
+        println!("Didn't match a number. Let's go with a letter!");
+    } else {
+        // The condition evaluated false. This branch is the default:
+        println!("I don't like letters. Let's go with an emoticon :)!");
     }
-    //=> The Answer: 42!
+    //=> I don't like letters. Let's go with an emoticon :)!
+
+    // Create example variables
+    let a = Foo::Bar;
+    let b = Foo::Baz;
+    let c = Foo::Qux(100);
+    // Variable a match Foo::Bar
+    if let Foo::Bar = a {
+        println!("a is foobar");
+    }
+    //=> a is foobar
+    // Variable b does not match Foo::Bar
+    if let Foo::Bar = b {
+        println!("b is foobar");
+    }
+    // Variable c matches Foo::Qux which has a value
+    // Similar to Some() in the previous example
+    if let Foo::Qux(value) = c {
+        println!("c is {}", value);
+    }
+    //=> c is 100
+    // Binding also works with if let
+    if let Foo::Qux(value @ 100) = c {
+        println!("c is one hundred");
+    }
+    //=> c is one hundred
 }
 
