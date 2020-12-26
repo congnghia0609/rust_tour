@@ -1,72 +1,35 @@
+fn is_odd(n: u32) -> bool {
+    n % 2 == 1
+}
+
 fn main() {
-    // 1. Iterator::any
-    /*
-    pub trait Iterator {
-        // The type being iterated over.
-        type Item;
+    println!("Find the sum of all the squared odd numbers under 1000");
+    let upper = 1000;
 
-        // `any` takes `&mut self` meaning the caller may be borrowed
-        // and modified, but not consumed.
-        fn any<F>(&mut self, f: F) -> bool where
-            // `FnMut` meaning any captured variable may at most be
-            // modified, not consumed. `Self::Item` states it takes
-            // arguments to the closure by value.
-            F: FnMut(Self::Item) -> bool {}
+    // Imperative approach
+    // Declare accumulator variable
+    let mut acc = 0;
+    // Iterate: 0, 1, 2, ... to infinity
+    for n in 0.. {
+        // Square the number
+        let n_squared = n * n;
+        if n_squared >= upper {
+            // Break loop if exceeded the upper limit
+            break;
+        } else if is_odd(n_squared) {
+            // Accumulate value, if it's odd
+            acc += n_squared;
+        }
     }
-    */
-    let vec1 = vec![1, 2, 3];
-    let vec2 = vec![4, 5, 6];
-    // `iter()` for vecs yields `&i32`. Destructure to `i32`.
-    println!("2 in vec1: {}", vec1.iter().any(|&x| x == 2));
-    // `into_iter()` for vecs yields `i32`. No destructuring required.
-    println!("2 in vec2: {}", vec2.into_iter().any(| x| x == 2));
+    println!("imperative style: {}", acc);
+    //=> imperative style: 5456
 
-    let array1 = [1, 2, 3];
-    let array2 = [4, 5, 6];
-    // `iter()` for arrays yields `&i32`.
-    println!("2 in array1: {}", array1.iter().any(|&x| x == 2));
-    // `into_iter()` for arrays unusually yields `&i32`.
-    println!("2 in array2: {}", array2.into_iter().any(|&x| x == 2));
-
-
-    // 2. Searching through iterators
-    /*
-    pub trait Iterator {
-        // The type being iterated over.
-        type Item;
-
-        // `find` takes `&mut self` meaning the caller may be borrowed
-        // and modified, but not consumed.
-        fn find<P>(&mut self, predicate: P) -> Option<Self::Item> where
-            // `FnMut` meaning any captured variable may at most be
-            // modified, not consumed. `&Self::Item` states it takes
-            // arguments to the closure by reference.
-            P: FnMut(&Self::Item) -> bool {}
-    }
-    */
-    let vec1 = vec![1, 2, 3];
-    let vec2 = vec![4, 5, 6];
-    // `iter()` for vecs yields `&i32`.
-    let mut iter = vec1.iter();
-    // `into_iter()` for vecs yields `i32`.
-    let mut into_iter = vec2.into_iter();
-    // `iter()` for vecs yields `&i32`, and we want to reference one of its
-    // items, so we have to destructure `&&i32` to `i32`
-    println!("Find 2 in vec1: {:?}", iter     .find(|&&x| x == 2));
-    // `into_iter()` for vecs yields `i32`, and we want to reference one of
-    // its items, so we have to destructure `&i32` to `i32`
-    println!("Find 2 in vec2: {:?}", into_iter.find(| &x| x == 2));
-
-    let array1 = [1, 2, 3];
-    let array2 = [4, 5, 6];
-    // `iter()` for arrays yields `&i32`
-    println!("Find 2 in array1: {:?}", array1.iter()     .find(|&&x| x == 2));
-    // `into_iter()` for arrays unusually yields `&i32`
-    println!("Find 2 in array2: {:?}", array2.into_iter().find(|&&x| x == 2));
-
-    let vec = vec![1, 9, 3, 3, 13, 2];
-    let index_of_first_even_number = vec.iter().position(|x| x % 2 == 0);
-    assert_eq!(index_of_first_even_number, Some(5));
-    let index_of_first_negative_number = vec.iter().position(|x| x < &0);
-    assert_eq!(index_of_first_negative_number, None);
+    // Functional approach
+    let sum_of_squared_odd_numbers: u32 =
+        (0..).map(|n| n * n)                                // All natural numbers squared
+            .take_while(|&n_squared| n_squared < upper)     // Below upper limit
+            .filter(|&n_squared| is_odd(n_squared))      // That are odd
+            .fold(0, |acc, n_squared| acc + n_squared);           // Sum them
+    println!("functional style: {}", sum_of_squared_odd_numbers);
+    //=> functional style: 5456
 }
