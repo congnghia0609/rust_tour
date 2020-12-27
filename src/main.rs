@@ -1,44 +1,37 @@
 
-mod my {
-    // A public struct with a public field of generic type T
-    pub struct OpenBox<T> {
-        pub contents: T,
-    }
+// Bind the deeply::nested::function path to other_function.
+use deeply::nested::function as other_function;
 
-    // A public struct with a private field of generic type T
-    #[allow(dead_code)]
-    pub struct ClosedBox<T> {
-        contents: T,
-    }
+fn function() {
+    println!("called function()");
+}
 
-    impl<T> ClosedBox<T> {
-        // A public constructor method
-        pub fn new(contents: T) -> ClosedBox<T> {
-            ClosedBox {
-                contents,
-            }
+mod deeply {
+    pub mod nested {
+        pub fn function() {
+            println!("called deeply::nested::function()");
         }
     }
 }
 
 fn main() {
-    // Public structs with public fields can be constructed as usual
-    let open_box = my::OpenBox {contents: "public information"};
+    // Easier access to deeply::nested::function
+    other_function();
+    println!("Entering block");
+    {
+        // This is equivalent to use deeply::nested::function as function.
+        // This function() will shadow the outer one.
+        use crate::deeply::nested::function;
+        // use binmding have a local scope. In this case,
+        // the shadowing of function() is only in this block.
+        function();
 
-    // and their fields can be normally accessed.
-    println!("The open box contains: {}", open_box.contents);
-
-    // Public structs with private fields cannot be constructed using field names.
-    // Error! `ClosedBox` has private fields
-    // let closed_box = my::ClosedBox { contents: "classified information" };
-    // TODO ^ Try uncommenting this line
-
-    // However, structs with private fields can be created using
-    // public constructors
-    let _close_box = my::ClosedBox::new("classified information");
-
-    // and the private fields of a public struct cannot be accessed.
-    // Error! The `contents` field is private
-    // println!("The closed box contains: {}", _closed_box.contents);
-    // TODO ^ Try uncommenting this line
+        println!("Leaving block");
+    }
+    function();
+    //=> called deeply::nested::function()
+    //=> Entering block
+    //=> called deeply::nested::function()
+    //=> Leaving block
+    //=> called function()
 }
