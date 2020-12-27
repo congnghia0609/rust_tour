@@ -1933,3 +1933,8 @@ fn main() {
 // > called rary's `private_function()`
 ```
 
+### 8. Cargo
+**cargo** is the official Rust package management tool.  
+Read more at [The Cargo Book](https://doc.rust-lang.org/cargo/).  
+
+
