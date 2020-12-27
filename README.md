@@ -1875,6 +1875,7 @@ fn main() {
 ```rust
 // Modules can be mapped to a file/directory hierarchy.
 /*
+tree .
 .
 |-- my
 |   |-- inaccessible.rs
@@ -1894,5 +1895,41 @@ fn main() {
     my::nested::function();
 }
 // rustc split.rs && ./split
+```
+
+### 7. Crates
+#### 7.1. Creating a Library
+```rust
+// file rary.rs
+pub fn public_function() {
+    println!("called rary's `public_function()`");
+}
+
+fn private_function() {
+    println!("called rary's `private_function()`");
+}
+
+pub fn indirect_access() {
+    print!("called rary's `indirect_access()`, that\n> ");
+    private_function();
+}
+// compile
+// rustc --crate-type=lib rary.rs
+```
+
+#### 7.2. Using a Library
+```rust
+// file executable.rs
+fn main() {
+    rary::public_function();
+    // Error! `private_function` is private
+    //rary::private_function();
+    rary::indirect_access();
+}
+// compile & run
+// rustc executable.rs --extern rary=library.rlib --edition=2018 && ./executable
+// called rary's `public_function()`
+// called rary's `indirect_access()`, that
+// > called rary's `private_function()`
 ```
 
