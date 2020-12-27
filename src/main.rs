@@ -1,37 +1,50 @@
 
-// Bind the deeply::nested::function path to other_function.
-use deeply::nested::function as other_function;
-
 fn function() {
     println!("called function()");
 }
 
-mod deeply {
-    pub mod nested {
+mod cool {
+    pub fn function() {
+        println!("called cool::function()");
+    }
+}
+
+mod my {
+    fn function() {
+        println!("called my::function()");
+    }
+    mod cool {
         pub fn function() {
-            println!("called deeply::nested::function()");
+            println!("called my::cool::function()");
+        }
+    }
+    pub fn indirect_call() {
+        // Let't access all the function named function from this scope!
+        print!("called my::indirect_call, that\n");
+        // The self keyword refers to the current module scope - in this case my.
+        // Calling self::function() and calling function() directly both give
+        // the same result, because they refer to the same function.
+        self::function();
+        function();
+        // We can also use self to access another module inside my:
+        self::cool::function();
+        // The super keyword refers to the parent scope (outside the my module).
+        super::function();
+        // This will bind to the cool::function in the crate scope.
+        // In this case the crate scope is the outermost scope.
+        {
+            use crate::cool::function as root_function;
+            root_function();
         }
     }
 }
 
 fn main() {
-    // Easier access to deeply::nested::function
-    other_function();
-    println!("Entering block");
-    {
-        // This is equivalent to use deeply::nested::function as function.
-        // This function() will shadow the outer one.
-        use crate::deeply::nested::function;
-        // use binmding have a local scope. In this case,
-        // the shadowing of function() is only in this block.
-        function();
-
-        println!("Leaving block");
-    }
-    function();
-    //=> called deeply::nested::function()
-    //=> Entering block
-    //=> called deeply::nested::function()
-    //=> Leaving block
+    my::indirect_call();
+    //=> called my::indirect_call, that
+    //=> called my::function()
+    //=> called my::function()
+    //=> called my::cool::function()
     //=> called function()
+    //=> called cool::function()
 }
