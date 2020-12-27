@@ -1871,3 +1871,28 @@ fn main() {
 }
 ```
 
+#### 6.5. File hierarchy
+```rust
+// Modules can be mapped to a file/directory hierarchy.
+/*
+.
+|-- my
+|   |-- inaccessible.rs
+|   |-- mod.rs
+|   `-- nested.rs
+`-- split.rs
+*/
+// file split.rs
+mod my;
+fn function() {
+    println!("called `function()`");
+}
+fn main() {
+    my::function();
+    function();
+    my::indirect_access();
+    my::nested::function();
+}
+// rustc split.rs && ./split
+```
+
