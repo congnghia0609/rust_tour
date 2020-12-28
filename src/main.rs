@@ -1,50 +1,28 @@
 
-fn function() {
-    println!("called function()");
-}
+// A concrete type A.
+struct A;
 
-mod cool {
-    pub fn function() {
-        println!("called cool::function()");
-    }
-}
+// In defining the type Single, the first use of A is not preceded by <A>.
+// Therefore, Single is a concrete type, and A is defined as above.
+struct Single<A>;
+//            ^ Here is `Single`s first use of the type `A`.
 
-mod my {
-    fn function() {
-        println!("called my::function()");
-    }
-    mod cool {
-        pub fn function() {
-            println!("called my::cool::function()");
-        }
-    }
-    pub fn indirect_call() {
-        // Let't access all the function named function from this scope!
-        print!("called my::indirect_call, that\n");
-        // The self keyword refers to the current module scope - in this case my.
-        // Calling self::function() and calling function() directly both give
-        // the same result, because they refer to the same function.
-        self::function();
-        function();
-        // We can also use self to access another module inside my:
-        self::cool::function();
-        // The super keyword refers to the parent scope (outside the my module).
-        super::function();
-        // This will bind to the cool::function in the crate scope.
-        // In this case the crate scope is the outermost scope.
-        {
-            use crate::cool::function as root_function;
-            root_function();
-        }
-    }
-}
+// Here, <T> precedes the first use of T, so SingleGen is a generic type.
+// Because the type parameter T is generic, it could be anything, including
+// the conrete type A defined at the top.
+struct SingleGen<T>(T);
 
 fn main() {
-    my::indirect_call();
-    //=> called my::indirect_call, that
-    //=> called my::function()
-    //=> called my::function()
-    //=> called my::cool::function()
-    //=> called function()
-    //=> called cool::function()
+    // Single is concrete and explicitly takes A.
+    let _s = Single(A);
+
+    // Create a variable _char of type SingleGen<char>
+    // and give it the value SIngleGen('a').
+    // Here, SingleGen has a type parameter explicitly specified.
+    let _char: SingleGen<char> = SingleGen('a');
+
+    // SingleGen can also have a type parameter implicitly specified:
+    let _t = SingleGen(A); // Use A defined at the top.
+    let _i32 = SingleGen(6); // Uses i32.
+    let _char = SingleGen('a'); // Uses char.
 }
