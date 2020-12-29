@@ -1,28 +1,67 @@
 
-// A concrete type A.
-struct A;
+struct Sheep {naked: bool, name: &'static str}
 
-// In defining the type Single, the first use of A is not preceded by <A>.
-// Therefore, Single is a concrete type, and A is defined as above.
-struct Single<A>;
-//            ^ Here is `Single`s first use of the type `A`.
+trait Animal {
+    // Static method signature; Self refers to the implementor type.
+    fn new(name: &'static str) -> Self;
+    // Instance method signatures; these will return a string.
+    fn name(&self) -> &'static str;
+    fn noise(&self) -> &'static str;
+    // Traits can provide default method definitions.
+    fn talk(&self) {
+        println!("{} say {}", self.name(), self.noise());
+    }
+}
 
-// Here, <T> precedes the first use of T, so SingleGen is a generic type.
-// Because the type parameter T is generic, it could be anything, including
-// the conrete type A defined at the top.
-struct SingleGen<T>(T);
+impl Sheep {
+    fn is_naked(&self) -> bool {
+        self.naked
+    }
+    fn shear(&mut self) {
+        if self.is_naked() {
+            // Implementor methods can use the implementor's trait methods.
+            println!("{} is already naked...", self.name());
+        } else {
+            println!("{} gets a haircut!", self.name);
+            self.naked = true;
+        }
+    }
+}
+
+// Implement the Animal trait for Sheep.
+impl Animal for Sheep {
+    // Self is the implementor type: Sheep.
+    fn new(name: &'static str) -> Self {
+        Sheep {name: name, naked: false}
+    }
+
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
+    fn noise(&self) -> &'static str {
+        if self.is_naked() {
+            "baaaaah?"
+        } else {
+            "baaaaah!"
+        }
+    }
+
+    // Default trait methods can be overridden.
+    fn talk(&self) {
+        // For example, we can add some quiet comtemplation.
+        println!("{} pauses briefly... {}", self.name, self.noise());
+    }
+}
 
 fn main() {
-    // Single is concrete and explicitly takes A.
-    let _s = Single(A);
-
-    // Create a variable _char of type SingleGen<char>
-    // and give it the value SIngleGen('a').
-    // Here, SingleGen has a type parameter explicitly specified.
-    let _char: SingleGen<char> = SingleGen('a');
-
-    // SingleGen can also have a type parameter implicitly specified:
-    let _t = SingleGen(A); // Use A defined at the top.
-    let _i32 = SingleGen(6); // Uses i32.
-    let _char = SingleGen('a'); // Uses char.
+    // Type annotation is necessary in this case.
+    let mut dolly:Sheep = Animal::new("Dolly");
+    // TODO ^ Try removing the type annotations.
+    dolly.talk();
+    dolly.shear();
+    dolly.talk();
+    //=> Dolly pauses briefly... baaaaah!
+    //=> Dolly gets a haircut!
+    //=> Dolly pauses briefly... baaaaah?
 }
