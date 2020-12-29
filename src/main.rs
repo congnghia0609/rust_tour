@@ -1,43 +1,34 @@
-
-trait UsernameWidget {
-    // Get the selected username out of this witget
-    fn get(&self) -> String;
-}
-
-trait AgeWidget {
-    // Get the selected age out of this widget
-    fn get(&self) -> u8;
-}
-
-// A form with both a UsernameWidget and an AgeWidget
-struct Form {
-    username: String,
-    age: u8,
-}
-
-impl UsernameWidget for Form {
-    fn get(&self) -> String {
-        self.username.clone()
+// An integer division that doesn't `panic!`
+fn checked_division(dividend: i32, divisor: i32) -> Option<i32> {
+    if divisor == 0 {
+        // Failure is represented as the `None` variant
+        None
+    } else {
+        // Result is wrapped in a `Some` variant
+        Some(dividend / divisor)
     }
 }
 
-impl AgeWidget for Form {
-    fn get(&self) -> u8 {
-        self.age
+// This function handles a division that may not succeed
+fn try_division(dividend: i32, divisor: i32) {
+    // `Option` values can be pattern matched, just like other enums
+    match checked_division(dividend, divisor) {
+        None => println!("{} / {} failed!", dividend, divisor),
+        Some(quotient) => {
+            println!("{} / {} = {}", dividend, divisor, quotient)
+        },
     }
 }
 
 fn main() {
-    let form = Form {
-        username: "rustacean".to_owned(),
-        age: 28,
-    };
-    // If you uncomment this line, you'll get an error saying
-    // "multiple `get` found". Because, after all, there are multiple methods
-    // named `get`.
-    // println!("{}", form.get());
-    let username = <Form as UsernameWidget>::get(&form);
-    assert_eq!("rustacean".to_owned(), username);
-    let age = <Form as AgeWidget>::get(&form);
-    assert_eq!(28, age);
+    try_division(4, 2);
+    try_division(1, 0);
+    // Binding `None` to a variable needs to be type annotated
+    let none: Option<i32> = None;
+    let _equivalent_none = None::<i32>;
+    let optional_float = Some(0f32);
+    // Unwrapping a `Some` variant will extract the value wrapped.
+    println!("{:?} unwraps to {:?}", optional_float, optional_float.unwrap());
+    // Unwrapping a `None` variant will `panic!`
+    println!("{:?} unwraps to {:?}", none, none.unwrap());
 }
