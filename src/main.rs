@@ -1,34 +1,82 @@
-// An integer division that doesn't `panic!`
-fn checked_division(dividend: i32, divisor: i32) -> Option<i32> {
-    if divisor == 0 {
-        // Failure is represented as the `None` variant
-        None
-    } else {
-        // Result is wrapped in a `Some` variant
-        Some(dividend / divisor)
+mod checked {
+    // Mathematical "errors" we want to catch
+    #[derive(Debug)]
+    pub enum MathError {
+        DivisionByZero,
+        NonPositiveLogarithm,
+        NegativeSquareRoot,
+    }
+
+    pub type MathResult = Result<f64, MathError>;
+
+    pub fn div(x: f64, y: f64) -> MathResult {
+        if y == 0.0 {
+            // This operation would `fail`, instead let's return the reason of
+            // the failure wrapped in `Err`
+            Err(MathError::DivisionByZero)
+        } else {
+            // This operation is valid, return the result wrapped in `Ok`
+            Ok(x / y)
+        }
+    }
+
+    pub fn sqrt(x: f64) -> MathResult {
+        if x < 0.0 {
+            Err(MathError::NegativeSquareRoot)
+        } else {
+            Ok(x.sqrt())
+        }
+    }
+
+    pub fn ln(x: f64) -> MathResult {
+        if x <= 0.0 {
+            Err(MathError::NonPositiveLogarithm)
+        } else {
+            Ok(x.ln())
+        }
+    }
+
+    // Intermediate function
+    fn op_(x: f64, y: f64) -> MathResult {
+        // if `div` "fails", then `DivisionByZero` will be `return`ed
+        let ratio = div(x, y)?;
+        // if `ln` "fails", then `NonPositiveLogarithm` will be `return`ed
+        let ln = ln(ratio)?;
+        sqrt(ln)
+    }
+
+    pub fn op(x: f64, y: f64) {
+        match op_(x, y) {
+            Err(why) => panic!(match why {
+                MathError::NonPositiveLogarithm
+                => "logarithm of non-positive number",
+                MathError::DivisionByZero
+                => "division by zero",
+                MathError::NegativeSquareRoot
+                => "square root of negative number",
+            }),
+            Ok(value) => println!("{}", value),
+        }
     }
 }
 
-// This function handles a division that may not succeed
-fn try_division(dividend: i32, divisor: i32) {
-    // `Option` values can be pattern matched, just like other enums
-    match checked_division(dividend, divisor) {
-        None => println!("{} / {} failed!", dividend, divisor),
-        Some(quotient) => {
-            println!("{} / {} = {}", dividend, divisor, quotient)
+// `op(x, y)` === `sqrt(ln(x / y))`
+fn op(x: f64, y: f64) -> f64 {
+    // This is a three level match pyramid!
+    match checked::div(x, y) {
+        Err(why) => panic!("{:?}", why),
+        Ok(ratio) => match checked::ln(ratio) {
+            Err(why) => panic!("{:?}", why),
+            Ok(ln) => match checked::sqrt(ln) {
+                Err(why) => panic!("{:?}", why),
+                Ok(sqrt) => sqrt,
+            },
         },
     }
 }
 
 fn main() {
-    try_division(4, 2);
-    try_division(1, 0);
-    // Binding `None` to a variable needs to be type annotated
-    let none: Option<i32> = None;
-    let _equivalent_none = None::<i32>;
-    let optional_float = Some(0f32);
-    // Unwrapping a `Some` variant will extract the value wrapped.
-    println!("{:?} unwraps to {:?}", optional_float, optional_float.unwrap());
-    // Unwrapping a `None` variant will `panic!`
-    println!("{:?} unwraps to {:?}", none, none.unwrap());
+    // Will this fail?
+    println!("{}", op(1.0, 10.0));
+    checked::op(1.0, 10.0);
 }
