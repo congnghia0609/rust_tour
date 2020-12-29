@@ -1,67 +1,43 @@
 
-struct Sheep {naked: bool, name: &'static str}
+trait UsernameWidget {
+    // Get the selected username out of this witget
+    fn get(&self) -> String;
+}
 
-trait Animal {
-    // Static method signature; Self refers to the implementor type.
-    fn new(name: &'static str) -> Self;
-    // Instance method signatures; these will return a string.
-    fn name(&self) -> &'static str;
-    fn noise(&self) -> &'static str;
-    // Traits can provide default method definitions.
-    fn talk(&self) {
-        println!("{} say {}", self.name(), self.noise());
+trait AgeWidget {
+    // Get the selected age out of this widget
+    fn get(&self) -> u8;
+}
+
+// A form with both a UsernameWidget and an AgeWidget
+struct Form {
+    username: String,
+    age: u8,
+}
+
+impl UsernameWidget for Form {
+    fn get(&self) -> String {
+        self.username.clone()
     }
 }
 
-impl Sheep {
-    fn is_naked(&self) -> bool {
-        self.naked
-    }
-    fn shear(&mut self) {
-        if self.is_naked() {
-            // Implementor methods can use the implementor's trait methods.
-            println!("{} is already naked...", self.name());
-        } else {
-            println!("{} gets a haircut!", self.name);
-            self.naked = true;
-        }
-    }
-}
-
-// Implement the Animal trait for Sheep.
-impl Animal for Sheep {
-    // Self is the implementor type: Sheep.
-    fn new(name: &'static str) -> Self {
-        Sheep {name: name, naked: false}
-    }
-
-    fn name(&self) -> &'static str {
-        self.name
-    }
-
-    fn noise(&self) -> &'static str {
-        if self.is_naked() {
-            "baaaaah?"
-        } else {
-            "baaaaah!"
-        }
-    }
-
-    // Default trait methods can be overridden.
-    fn talk(&self) {
-        // For example, we can add some quiet comtemplation.
-        println!("{} pauses briefly... {}", self.name, self.noise());
+impl AgeWidget for Form {
+    fn get(&self) -> u8 {
+        self.age
     }
 }
 
 fn main() {
-    // Type annotation is necessary in this case.
-    let mut dolly:Sheep = Animal::new("Dolly");
-    // TODO ^ Try removing the type annotations.
-    dolly.talk();
-    dolly.shear();
-    dolly.talk();
-    //=> Dolly pauses briefly... baaaaah!
-    //=> Dolly gets a haircut!
-    //=> Dolly pauses briefly... baaaaah?
+    let form = Form {
+        username: "rustacean".to_owned(),
+        age: 28,
+    };
+    // If you uncomment this line, you'll get an error saying
+    // "multiple `get` found". Because, after all, there are multiple methods
+    // named `get`.
+    // println!("{}", form.get());
+    let username = <Form as UsernameWidget>::get(&form);
+    assert_eq!("rustacean".to_owned(), username);
+    let age = <Form as AgeWidget>::get(&form);
+    assert_eq!(28, age);
 }
