@@ -2829,4 +2829,134 @@ fn main() {
 }
 ```
 
+#### 12.5. HashMap & HashSet
+**HashMap** is a structure Key-Value.  
+**HashSet** as a HashMap where we just care about the keys (`HashSet<T>` is, in actuality, just a wrapper around `HashMap<T, ()>`).  
+**Sets** have 4 primary operations (all of the following calls return an iterator):  
++ **union**: get all the unique elements in both sets.
++ **difference**: get all the elements that are in the first set but not the second.
++ **intersection**: get all the elements that are only in both sets.
++ **symmetric_difference**: get all the elements that are in one set or the other, but not both.
+```rust
+use std::collections::HashMap;
+use std::collections::HashSet;
+
+fn call(number: &str) -> &str {
+    match number {
+        "798-1364" => "We're sorry, the call cannot be completed as dialed.
+            Please hang up and try again.",
+        "645-7689" => "Hello, this is Mr. Awesome's Pizza. My name is Fred.
+            What can I get for you today?",
+        _ => "Hi! Who is this again?"
+    }
+}
+
+fn main() {
+    // 1. HashMap
+    let mut contacts = HashMap::new();
+    contacts.insert("Daniel", "798-1364");
+    contacts.insert("Ashley", "645-7689");
+    contacts.insert("Katie", "435-8291");
+    contacts.insert("Robert", "956-1745");
+    // Take a reference and returns Option<&V>
+    match contacts.get(&"Daniel") {
+        Some(&number) => println!("Calling Daniel: {}", call(number)),
+        _ => println!("Don't have Daniel's number."),
+    }
+    // HashMap::insert() returns Nome
+    // If the inserted value is new, Some(value) otherwise
+    contacts.insert("Daniel", "164-6743");
+    match contacts.get(&"Ashley") {
+        Some(&number) => println!("Calling Ashley: {}", call(number)),
+        _ => println!("Don't have Ashley's number."),
+    }
+    contacts.remove(&"Ashley");
+    // HashMap::iter() returns an iterator that yields
+    // (&'a key, &'a value) pair in arbitrary order.
+    for (contact, &number) in contacts.iter() {
+        println!("Calling {}: {}", contact, call(number));
+    }
+
+    // 2. HashSet
+    let mut a: HashSet<i32> = vec![1i32, 2, 3].into_iter().collect();
+    let mut b: HashSet<i32> = vec![2i32, 3, 4].into_iter().collect();
+    assert!(a.insert(4));
+    assert!(a.contains(&4));
+    // HashSet::insert() returns false if
+    // there was a value already present.
+    // assert!(b.insert(4), "Value 4 is already in set B!");
+    // FIXME ^ Comment out this line
+    b.insert(5);
+    // If a collection's element type implements `Debug`,
+    // then the collection implements `Debug`.
+    // It usually prints its elements in the format `[elem1, elem2, ...]`
+    println!("A: {:?}", a);
+    println!("B: {:?}", b);
+    // Print [1, 2, 3, 4, 5] in arbitrary order
+    println!("Union: {:?}", a.union(&b).collect::<Vec<&i32>>());
+    // This should print [1]
+    println!("Difference: {:?}", a.difference(&b).collect::<Vec<&i32>>());
+    // Print [2, 3, 4] in arbitrary order.
+    println!("Intersection: {:?}", a.intersection(&b).collect::<Vec<&i32>>());
+    // Print [1, 5]
+    println!("Symmetric Difference: {:?}", a.symmetric_difference(&b).collect::<Vec<&i32>>());
+}
+```
+
+#### 12.6. Rc
+When multiple ownership is needed, `Rc`(Reference Counting) can be used. Rc keeps track of the number of the references which means the number of owners of the value wrapped inside an `Rc`.  
+```rust
+use std::rc::Rc;
+
+fn main() {
+    let rc_examples = "Rc examples".to_string();
+    {
+        println!("--- rc_a is created ---");
+        let rc_a: Rc<String> = Rc::new(rc_examples);
+        println!("Reference Count of rc_a: {}", Rc::strong_count(&rc_a));
+        {
+            println!("--- rc_a is cloned to rc_b ---");
+            let rc_b: Rc<String> = Rc::clone(&rc_a);
+            println!("Reference Count of rc_b: {}", Rc::strong_count(&rc_b));
+            println!("Reference Count of rc_a: {}", Rc::strong_count(&rc_a));
+            // Two `Rc`s are equal if their inner values are equal
+            println!("rc_a and rc_b are equal: {}", rc_a.eq(&rc_b));
+            // We can use methods of a value directly
+            println!("Length of the value inside rc_a: {}", rc_a.len());
+            println!("Value of rc_b: {}", rc_b);
+            println!("--- rc_b is dropped out of scope ---");
+        }
+        println!("Reference Count of rc_a: {}", Rc::strong_count(&rc_a));
+        println!("--- rc_a is dropped out of scope ---");
+    }
+    // Error! `rc_examples` already moved into `rc_a`
+    // And when `rc_a` is dropped, `rc_examples` is dropped together
+    // println!("rc_examples: {}", rc_examples);
+    // TODO ^ Try uncommenting this line
+}
+```
+
+#### 12.7. Arc
+When shared ownership between threads is needed, `Arc`(Atomic Reference Counted) can be used.  
+```rust
+fn main() {
+    use std::sync::Arc;
+    use std::thread;
+
+    // This variable declaration is where it's value is specified.
+    let apple = Arc::new("the same apple");
+    for _ in 0..10 {
+        // Here there is no value specification as it is a pointer to a reference
+        // in the memory heap.
+        let apple = Arc::clone(&apple);
+        thread::spawn(move || {
+            // As Arc was used, threads can be spawned using the value allocated
+            // in the Arc variable pointer's location.
+            println!("{:?}", apple);
+        });
+    }
+}
+```
+
+
 
