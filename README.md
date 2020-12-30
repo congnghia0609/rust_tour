@@ -3071,4 +3071,76 @@ fn main() {
 }
 ```
 
+#### 13.2. Channels
+Rust provides asynchronous `channels` for communication between threads. Channels allow a unidirectional flow of information between two end-points: the `Sender` and the `Receiver`.  
+```rust
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
+
+static NTHREADS: i32 = 3;
+
+// This is the `main` thread
+fn main() {
+    // Channels have two endpoints: the Sender<T> and the Receiver<T>,
+    // where T is the type of the message to be transferred
+    // (type annotation is superfluous)
+    let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
+    let mut children = Vec::new();
+    for id in 0..NTHREADS {
+        // The sender endpoint can be copied
+        let thread_tx = tx.clone();
+        // Each thread will send its id via the channel
+        let child = thread::spawn(move || {
+            // The thread takes ownership over thread_tx
+            // Each thread queues a message in the channel
+            thread_tx.send(id).unwrap();
+            // Sending is a non-blocking operation, the thread will continue
+            // immediately after sending its message
+            println!("thread {} finished", id);
+        });
+        children.push(child);
+    }
+    // Here, all the messages are collected
+    let mut ids = Vec::with_capacity(NTHREADS as usize);
+    for _ in 0..NTHREADS {
+        // The recv method picks a message from the channel
+        // recv will block the current thread if there are no message available
+        ids.push(rx.recv());
+    }
+    // Wait for the threads to complete any retaining work
+    for child in children {
+        child.join().expect("oops! the child thread panicked");
+    }
+    // Show the order in which the messages were sent
+    println!("{:?}", ids);
+    //=> thread 0 finished
+    //=> thread 1 finished
+    //=> thread 2 finished
+    //=> [Ok(0), Ok(1), Ok(2)]
+}
+```
+
+#### 13.3. Path
+The `Path` struct represents file paths in the underlying filesystem.  
+```rust
+use std::path::Path;
+
+fn main() {
+    // Create a `Path` from an `&'static str`
+    let path = Path::new(".");
+    // The `display` method returns a `Show`able structure
+    let _display = path.display();
+    // `join` merges a path with a byte container using the OS specific
+    // separator, and returns the new path
+    let new_path = path.join("a").join("b");
+    // Convert the path into a string slice
+    match new_path.to_str() {
+        None => panic!("new path is not a valid UTF-8 sequence"),
+        Some(s) => println!("new path is {}", s),
+    }
+    //=> new path is ./a/b
+}
+```
+
 
