@@ -1,18 +1,23 @@
+use std::fs::File;
+use std::io::{self, BufRead};
 use std::path::Path;
 
 fn main() {
-    // Create a `Path` from an `&'static str`
-    let path = Path::new(".");
-    // The `display` method returns a `Show`able structure
-    let _display = path.display();
-    // `join` merges a path with a byte container using the OS specific
-    // separator, and returns the new path
-    let new_path = path.join("a").join("b");
-    // Convert the path into a string slice
-    match new_path.to_str() {
-        None => panic!("new path is not a valid UTF-8 sequence"),
-        Some(s) => println!("new path is {}", s),
+    // File hosts must exist in current path before this produces output
+    if let Ok(lines) = read_lines("./hosts.txt") {
+        // Consumes the iterator, returns an (Optional) String
+        for line in lines {
+            if let Ok(ip) = line {
+                println!("{}", ip);
+            }
+        }
     }
-    //=> new path is ./a/b
 }
 
+// The output is wrapped in a Result to allow matching on errors
+// Returns an Iterator to the Reader of the lines of the file.
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+    where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
+}
