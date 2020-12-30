@@ -1,93 +1,64 @@
-use std::fs;
-use std::fs::{File, OpenOptions};
-use std::io;
-use std::io::prelude::*;
-use std::os::unix;
-use std::path::Path;
+use std::env;
 
-// A simple implementation of `% cat path`
-fn cat(path: &Path) -> io::Result<String> {
-    let mut f = File::open(path)?;
-    let mut s = String::new();
-    match f.read_to_string(&mut s) {
-        Ok(_) => Ok(s),
-        Err(e) => Err(e),
-    }
+fn increase(number: i32) {
+    println!("{}", number + 1);
 }
 
-// A simple implementation of `% echo s > path`
-fn echo(s: &str, path: &Path) -> io::Result<()> {
-    let mut f = File::create(path)?;
-
-    f.write_all(s.as_bytes())
+fn decrease(number: i32) {
+    println!("{}", number - 1);
 }
 
-// A simple implementation of `% touch path` (ignores existing files)
-fn touch(path: &Path) -> io::Result<()> {
-    match OpenOptions::new().create(true).write(true).open(path) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e),
-    }
+fn help() {
+    println!("usage:
+match_args <string>
+    Check whether given string is the answer.
+match_args {{increase|decrease}} <integer>
+    Increase or decrease given integer by one.");
 }
 
 fn main() {
-    println!("`mkdir a`");
-    // Create a directory, returns `io::Result<()>`
-    match fs::create_dir("a") {
-        Err(why) => println!("! {:?}", why.kind()),
-        Ok(_) => {},
-    }
-
-    println!("`echo hello > a/b.txt`");
-    // The previous match can be simplified using the `unwrap_or_else` method
-    echo("hello", &Path::new("a/b.txt")).unwrap_or_else(|why| {
-        println!("! {:?}", why.kind());
-    });
-
-    println!("`mkdir -p a/c/d`");
-    // Recursively create a directory, returns `io::Result<()>`
-    fs::create_dir_all("a/c/d").unwrap_or_else(|why| {
-        println!("! {:?}", why.kind());
-    });
-
-    println!("`touch a/c/e.txt`");
-    touch(&Path::new("a/c/e.txt")).unwrap_or_else(|why| {
-        println!("! {:?}", why.kind());
-    });
-
-    println!("`ln -s ../b.txt a/c/b.txt`");
-    // Create a symbolic link, returns `io::Result<()>`
-    if cfg!(target_family = "unix") {
-        unix::fs::symlink("../b.txt", "a/c/b.txt").unwrap_or_else(|why| {
-            println!("! {:?}", why.kind());
-        });
-    }
-
-    println!("`cat a/c/b.txt`");
-    match cat(&Path::new("a/c/b.txt")) {
-        Err(why) => println!("! {:?}", why.kind()),
-        Ok(s) => println!("> {}", s),
-    }
-
-    println!("`ls a`");
-    // Read the contents of a directory, returns `io::Result<Vec<Path>>`
-    match fs::read_dir("a") {
-        Err(why) => println!("! {:?}", why.kind()),
-        Ok(paths) => for path in paths {
-            println!("> {:?}", path.unwrap().path());
+    let args: Vec<String> = env::args().collect();
+    match args.len() {
+        // no arguments passed
+        1 => {
+            println!("My name is 'match_args'. Try passing some arguments!");
         },
+        // one argument passed
+        2 => {
+            match args[1].parse() {
+                Ok(42) => println!("This is the answer!"),
+                _ => println!("This is not the answer."),
+            }
+        },
+        // one command and one argument passed
+        3 => {
+            let cmd = &args[1];
+            let num = &args[2];
+            // parse the number
+            let number: i32 = match num.parse() {
+                Ok(n) => {
+                    n
+                },
+                Err(_) => {
+                    eprintln!("error: second argument not an integer");
+                    help();
+                    return;
+                },
+            };
+            // parse the command
+            match &cmd[..] {
+                "increase" => increase(number),
+                "decrease" => decrease(number),
+                _ => {
+                    eprintln!("error: invalid command");
+                    help();
+                },
+            }
+        },
+        // all the other cases
+        _ => {
+            // show a help message
+            help();
+        }
     }
-
-    println!("`rm a/c/e.txt`");
-    // Remove a file, returns `io::Result<()>`
-    fs::remove_file("a/c/e.txt").unwrap_or_else(|why| {
-        println!("! {:?}", why.kind());
-    });
-
-    println!("`rmdir a/c/d`");
-    // Remove an empty directory, returns `io::Result<()>`
-    fs::remove_dir("a/c/d").unwrap_or_else(|why| {
-        println!("! {:?}", why.kind());
-    });
 }
-
