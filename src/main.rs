@@ -1,23 +1,18 @@
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::process::Command;
 
 fn main() {
-    // File hosts must exist in current path before this produces output
-    if let Ok(lines) = read_lines("./hosts.txt") {
-        // Consumes the iterator, returns an (Optional) String
-        for line in lines {
-            if let Ok(ip) = line {
-                println!("{}", ip);
-            }
-        }
+    let output = Command::new("rustc")
+        .arg("--version")
+        .output().unwrap_or_else(|e| {
+        panic!("failed to execute process: {}", e)
+    });
+    if output.status.success() {
+        let s = String::from_utf8_lossy(&output.stdout);
+        print!("rustc succeeded and stdout was:\n{}", s);
+    } else {
+        let s = String::from_utf8_lossy(&output.stderr);
+        print!("rustc failed and stderr was:\n{}", s);
     }
-}
-
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-    where P: AsRef<Path>, {
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
+    //=> rustc succeeded and stdout was:
+    //=> rustc 1.47.0 (18bf6b4f0 2020-10-07)
 }
