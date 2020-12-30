@@ -1,64 +1,46 @@
-use std::env;
+use std::fmt;
 
-fn increase(number: i32) {
-    println!("{}", number + 1);
+// this extern block links to the libm library
+#[link(name = "m")]
+extern {
+    // this is a foreign function
+    // that computes the square root of a single precision complex number
+    fn csqrtf(z: Complex) -> Complex;
+    fn ccosf(z: Complex) -> Complex;
 }
 
-fn decrease(number: i32) {
-    println!("{}", number - 1);
-}
-
-fn help() {
-    println!("usage:
-match_args <string>
-    Check whether given string is the answer.
-match_args {{increase|decrease}} <integer>
-    Increase or decrease given integer by one.");
+// Since calling foreign functions is considered unsafe,
+// it's common to write safe wrappers around them.
+fn cos(z: Complex) -> Complex {
+    unsafe { ccosf(z) }
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    match args.len() {
-        // no arguments passed
-        1 => {
-            println!("My name is 'match_args'. Try passing some arguments!");
-        },
-        // one argument passed
-        2 => {
-            match args[1].parse() {
-                Ok(42) => println!("This is the answer!"),
-                _ => println!("This is not the answer."),
-            }
-        },
-        // one command and one argument passed
-        3 => {
-            let cmd = &args[1];
-            let num = &args[2];
-            // parse the number
-            let number: i32 = match num.parse() {
-                Ok(n) => {
-                    n
-                },
-                Err(_) => {
-                    eprintln!("error: second argument not an integer");
-                    help();
-                    return;
-                },
-            };
-            // parse the command
-            match &cmd[..] {
-                "increase" => increase(number),
-                "decrease" => decrease(number),
-                _ => {
-                    eprintln!("error: invalid command");
-                    help();
-                },
-            }
-        },
-        // all the other cases
-        _ => {
-            // show a help message
-            help();
+    // z = -1 + 0i
+    let z = Complex { re: -1., im: 0. };
+    // calling a foreign function is an unsafe operation
+    let z_sqrt = unsafe { csqrtf(z) };
+    println!("the square root of {:?} is {:?}", z, z_sqrt);
+    // calling safe API wrapped around unsafe operation
+    println!("cos({:?}) = {:?}", z, cos(z));
+    //=> the square root of -1+0i is 0+1i
+    //=> cos(-1+0i) = 0.5403023+0i
+}
+
+// Minimal implementation of single precision complex numbers
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct Complex {
+    re: f32,
+    im: f32,
+}
+
+impl fmt::Debug for Complex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.im < 0. {
+            write!(f, "{}-{}i", self.re, -self.im)
+        } else {
+            write!(f, "{}+{}i", self.re, self.im)
         }
     }
 }
